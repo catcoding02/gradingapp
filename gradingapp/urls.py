@@ -16,7 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.urls import include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # this is telling django that any URLs within the urls.py document in the 'playground'
+    # app folder should be rerouted to run through here
+    path('playground/', include('playground.urls'))
 ]
