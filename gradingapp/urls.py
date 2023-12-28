@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+import debug_toolbar
 from django.urls import path
 from django.urls import include
 
@@ -23,12 +24,6 @@ urlpatterns = [
     # this is telling django that any URLs within the urls.py document in the 'playground'
     # app folder should be rerouted to run through here
     path('playground/', include('playground.urls')),
-    path('__debug__/', include(debug_toolbar.urls))
+    path('^__debug__/', include(debug_toolbar.urls))
 ]
 
-if settings.DEBUG:
-    import debug_toolbar
-
-    urlpatterns += [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
-    ]
