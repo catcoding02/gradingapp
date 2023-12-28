@@ -22,5 +22,13 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # this is telling django that any URLs within the urls.py document in the 'playground'
     # app folder should be rerouted to run through here
-    path('playground/', include('playground.urls'))
+    path('playground/', include('playground.urls')),
+    path('__debug__/', include(debug_toolbar.urls))
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]

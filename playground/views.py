@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+import debug_toolbar
 
 # Create your views here.
 
