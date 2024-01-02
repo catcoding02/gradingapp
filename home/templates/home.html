@@ -1,0 +1,29 @@
+<html>
+    <body>
+        <h1>Hello Visitor, welcome to GradingApp! </h1>
+        <div>
+            <a href="https://weather.com">
+                <button>Log In</button>
+            </a>
+        </div>
+        <div>
+            <a href="https://weather.com">
+                <button>Sign Up</button>
+            </a>
+        </div>
+        <div>
+            <ul>
+                {% for x in list %}
+                  <li>{{ x }}</li>
+                {% endfor %}
+              </ul>
+        </div>
+        <div>
+            <ul>
+                {% for x in response %}
+                  <li>{{ x }}</li>
+                {% endfor %}
+              </ul>
+        </div>
+    </body>
+</html>
