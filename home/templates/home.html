@@ -1,29 +1,56 @@
+{% extends 'gradingapp/templates/base.html' %}
+
+{% block content %}
 <html>
     <body>
-        <h1>Hello Visitor, welcome to GradingApp! </h1>
+        {% if request.session.name %}
+            <h1>Hello user {{ request.session.name }}, welcome to GradingApp! </h1>
+        {% else %}
+            <h1>Hello Visitor, welcome to GradingApp! </h1>
+        {% endif %}
+        {% if request.session.grading_list %}
+            <h2>{{ request.session.grading_list }}</h2>
+            <h2>{{ request.session.grading_config_dict }}</h2>
+        {% endif %}
+        {% if user.is_authenticated and user_profile_form %}
+            <div>
+                <a href={% url 'members:logout' %}>
+                    <button>Log Out</button>
+                </a>
+            </div>
+            <div>
+                <form action = "" method = "post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ user_profile_form }}
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+        {% elif okur and current_user_form %}
+        <h3> {{ okur }} </h3>
+        <form action = "" method = "post" enctype="multipart/form-data">
+            {% csrf_token %}
+        {{ current_user_form }}
+        <input type="submit" value="Submit">
+        </form>
         <div>
-            <a href="https://weather.com">
-                <button>Log In</button>
+            <a href={% url 'members:logout' %}>
+                <button>Log Out</button>
             </a>
         </div>
-        <div>
-            <a href="https://weather.com">
-                <button>Sign Up</button>
-            </a>
-        </div>
-        <div>
-            <ul>
-                {% for x in list %}
-                  <li>{{ x }}</li>
-                {% endfor %}
-              </ul>
-        </div>
-        <div>
-            <ul>
-                {% for x in response %}
-                  <li>{{ x }}</li>
-                {% endfor %}
-              </ul>
-        </div>
+        {% else %}
+            <div>
+                <a href={% url 'members:login' %}>
+                    <button>Log In</button>
+                </a>
+            </div>
+            <div>
+                <a href={% url 'members:register_user' %}>
+                    <button>Register</button>
+                </a>
+            </div>
+        {% endif %}
+        
+
     </body>
 </html>
+{% endblock %}

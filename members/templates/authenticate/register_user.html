@@ -1,0 +1,25 @@
+{% extends 'gradingapp/templates/base.html' %}
+
+{% block content %}
+<h1>
+  REGISTER
+</h1>
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<form action="{% url 'members:register_user' %}" method=POST>
+  {% csrf_token %}
+    {{ form.as_p }}
+  
+    <!-- Submit button -->
+    <input type="submit" class="btn btn-primary btn-block mb-4" value="Submit">
+  
+  </form>
+  </html>
+  {% endblock %}

@@ -1,14 +1,36 @@
-<form>
-    <!-- Email input -->
+{% extends 'gradingapp/templates/base.html' %}
+
+{% block content %}
+<h1>
+  LOGIN
+</h1>
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<form action="" method=POST>
+  {% csrf_token %}
+    <!-- First Name input -->
     <div class="form-outline mb-4">
-      <input type="email" id="form2Example1" class="form-control" />
-      <label class="form-label" for="form2Example1">Email address</label>
+      <input type="text" name="first_name" class="form-control" />
+      <label class="form-label" for="form2Example1">First Name</label>
+    </div>
+
+    <!-- Username input -->
+    <div class="form-outline mb-4">
+      <input type="text" name="username" class="form-control" />
+      <label class="form-label" for="form2Example1">Username</label>
     </div>
   
     <!-- Password input -->
     <div class="form-outline mb-4">
-      <input type="password" id="form2Example2" class="form-control" />
-      <label class="form-label" for="form2Example2">Password</label>
+      <input type="password" name="github_access_token" class="form-control" />
+      <label class="form-label" for="form2Example2">GitHub Access Token</label>
     </div>
   
     <!-- 2 column grid layout for inline styling -->
@@ -28,7 +50,7 @@
     </div>
   
     <!-- Submit button -->
-    <button type="button" class="btn btn-primary btn-block mb-4">Sign in</button>
+    <input type="submit" class="btn btn-primary btn-block mb-4" value="Submit">
   
     <!-- Register buttons -->
     <div class="text-center">
@@ -51,3 +73,5 @@
       </button>
     </div>
   </form>
+  </html>
+  {% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'gradingapp/templates/base.html' %}
+
+{% block content %}
+<html>
+    <h1>
+    CLASS LIST
+    </h1>
+
+    {% if class_dict %}
+        {% for key,value in class_dict.items %}
+        <li>
+            <a href="{% url 'members:CLASS_ID' CLASS_ID=value %}">
+                {{ key }}
+            </a>
+        </li>
+        {% endfor %}
+
+    {% else %}
+        <form action="{% url 'members:class' %}" method=POST>
+            {% csrf_token %}
+                {{ ghat_form }}
+            
+                <!-- Submit button -->
+                <input type="submit" class="btn btn-primary btn-block mb-4" value="Submit">
+            
+        </form>
+    {% endif %}
+  </html>
+  {% endblock %}

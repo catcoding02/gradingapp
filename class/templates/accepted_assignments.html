@@ -1,0 +1,27 @@
+{% extends 'gradingapp/templates/base.html' %}
+
+{% block content %}
+<html>
+    <h1>
+    ACCEPTED ASSIGNMENTS / ASSIGNMENT REPOS AND SPR STUFF
+    </h1>
+
+    {% if accepted_assignments %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {% for key,value in accepted_assignments.items %}
+                <input type="checkbox" id="student" name="student" value={{ value }}>
+                <label for="student"> {{ key }} </label><br>
+        {% endfor %}
+        <input type="submit" value="Submit">
+    </form>
+        <a href="/"}>
+            <button>Grade All</button>
+        </a>
+    {% elif request.session.grading_list %}
+    <h3>Will run grader func</h3>
+    <h2>{{ request.session.grading_list }}</h2>
+    <h2>{{ request.session.grading_config_dict }}</h2>}
+    {% endif %}
+  </html>
+  {% endblock %}

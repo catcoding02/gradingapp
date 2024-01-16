@@ -18,6 +18,10 @@ from django.contrib import admin
 import debug_toolbar
 from django.urls import path
 from django.urls import include
+from django.conf import settings
+from django.conf.urls.static import static
+
+app_name='gradingapp'
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -25,7 +29,9 @@ urlpatterns = [
     # app folder should be rerouted to run through here
     path('home/', include('home.urls')),
     path('^__debug__/', include(debug_toolbar.urls)),
-    path('members/', include('members.urls')),
+    path('members/', include('members.urls', 'members')),
     path('members/', include('django.contrib.auth.urls')),
+    path('class/', include('class.urls', 'class'))
 ]
 
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

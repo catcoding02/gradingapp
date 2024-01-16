@@ -1,0 +1,19 @@
+{% extends 'gradingapp/templates/base.html' %}
+
+{% block content %}
+<html>
+    <h1>
+    ASSIGNMENT LIST
+    </h1>
+
+    {% if assignment_dict %}
+        {% for key,value in assignment_dict.items %}
+        <li>
+            <a href="{% url 'class:FORMSET' ASSIGNMENT_ID=value %}">
+                {{ key }}
+            </a>
+        </li>
+        {% endfor %}
+    {% endif %}
+  </html>
+  {% endblock %}

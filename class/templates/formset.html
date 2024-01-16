@@ -1,0 +1,17 @@
+{% extends 'gradingapp/templates/base.html' %}
+
+{% block content %}
+<html>
+    <h1>
+    GRADING CONFIG
+    </h1>
+    {% if assignment_id %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ formset.as_p }}
+            <input type="hidden" name="next" value="{% url 'class:ASSIGNMENT_ID' ASSIGNMENT_ID=assignment_id %}">
+            <input type="submit" value="Submit">
+    </form>
+    {% endif %}
+  </html>
+  {% endblock %}
