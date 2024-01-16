@@ -42,17 +42,6 @@ def get_grading_config_objects():
     return grading_config_dict
 
 def run_the_grader(ghat, request):
-    def get_contributors(ghat):
-        """
-        Gets contribitors to GitHub repository. Should return one student if lab, or all students 
-        in a team if this is a mini-project
-        """
-        headers = {
-    'Accept': 'application/vnd.github+json',
-    'Authorization': f'Bearer {ghat}',
-    'X-GitHub-Api-Version': '2022-11-28',
-}
-
     def google_sheets_setup(request):
         """
         Run Google Sheets set-up
@@ -70,6 +59,17 @@ def run_the_grader(ghat, request):
         client = gspread.authorize(credentials)  # authenticates  the JSON key with gspread
         sheet = client.open("SDS192 Gradebooks")
         return sheet
+    def get_contributors(ghat, repository_list):
+        """
+        Gets contribitors to GitHub repository. Should return one student if lab, or all students 
+        in a team if this is a mini-project
+        """
+        headers = {
+    'Accept': 'application/vnd.github+json',
+    'Authorization': f'Bearer {ghat}',
+    'X-GitHub-Api-Version': '2022-11-28',
+}
+
     def transfer_comments():
         """
         Transfers GitHub grades and comments to Google Sheets gradebook
@@ -113,7 +113,6 @@ def grade_acc_assignments(request):
 
 def formset_view(request, ASSIGNMENT_ID):
     formset = modelformset_factory(GradingConfig, fields = ('standard', 'points', 'row'), extra = 10)
-    # not being activated rn
     if request.method == "POST":
         form = formset(request.POST)
         form.save()
