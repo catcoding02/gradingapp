@@ -31,7 +31,8 @@ def welcome_home(request):
     # context which shouldn't be a problem since we aren't
     # asking to display any context in that case anyways
     # getting form
-    if not UserProfile.objects.filter(user = request.user):
+    user = request.user
+    if not UserProfile.objects.get(user_id = user.id):
         form = UserProfileForm()
         context = {
                 'user_profile_form': form
@@ -43,19 +44,21 @@ def welcome_home(request):
             user_profile = form.save(commit=False)
             user_profile.user = request.user
             # deletes current instance and replaces with new one
-            UserProfile.objects.filter(user = request.user).delete()
+            user = request.user
+            UserProfile.objects.get(user_id = user.id).delete()
             user_profile.save()
             request.session['github_access_token'] = form.cleaned_data['github_access_token']
             request.session['class_list'] = list_classrooms(request.session['github_access_token'])
             return redirect('members:class')
         else:
-            form = UserProfileForm()
-            context = {
-            'user_profile_form': form
-        }
-            return redirect('https://weather.com')
+            # if form not valid despite there already being stuff posted to the form
+            # it must mean they are good with what they've got and it's time for them to move on
+            request.session['github_access_token'] = form.cleaned_data['github_access_token']
+            request.session['class_list'] = list_classrooms(request.session['github_access_token'])
+            return redirect('members:class')
     else:
-        current_profile_obj = UserProfile.objects.get(user = request.user)
+        user = request.user
+        current_profile_obj = UserProfile.objects.get(user_id=user.id)
         form = UserProfileForm(instance = current_profile_obj)
         context = {'current_user_form': form, 'okur': 'you are logged in but you have already filled out the user profile stuff! you can edit it tho if u want'}
         return HttpResponse(template.render(context, request))

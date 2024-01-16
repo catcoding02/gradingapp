@@ -46,7 +46,8 @@ def run_the_grader(ghat, request):
         """
         Run Google Sheets set-up
         """
-        current_user = UserProfile.objects.get(user = request.user)
+        user = request.user
+        current_user = UserProfile.objects.get(user = user.id)
         json_file = current_user.json_file
         with open(json_file) as json_file:
             unloaded_json = json.loads(json_file)
