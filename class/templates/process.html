@@ -1,0 +1,21 @@
+{% extends 'gradingapp/templates/base.html' %}
+
+{% block content %}
+<html>
+    <h1>
+    PROCESS MESSAGE
+    </h1>
+
+    {% if process_done %}
+    <h1>{{ process_done }} </h1>
+    {% elif process_failed %}
+    <h1>{{ process_failed }}</h1>
+    {% endif %}
+    <div>
+        <a href={% url 'members:logout' %}>
+            <button>Log Out</button>
+        </a>
+    </div>
+
+  </html>
+  {% endblock %}

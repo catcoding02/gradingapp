@@ -3,7 +3,7 @@
 {% block content %}
 <html>
     <h1>
-    ACCEPTED ASSIGNMENTS / ASSIGNMENT REPOS AND SPR STUFF
+    ACCEPTED ASSIGNMENTS
     </h1>
 
     {% if accepted_assignments %}
@@ -14,14 +14,6 @@
                 <label for="student"> {{ key }} </label><br>
         {% endfor %}
         <input type="submit" value="Submit">
-    </form>
-        <a href="/"}>
-            <button>Grade All</button>
-        </a>
-    {% elif request.session.grading_list %}
-    <h3>Will run grader func</h3>
-    <h2>{{ request.session.grading_list }}</h2>
-    <h2>{{ request.session.grading_config_dict }}</h2>}
     {% endif %}
   </html>
   {% endblock %}

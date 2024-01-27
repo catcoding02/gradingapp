@@ -6,6 +6,7 @@ from gradingapp.forms import GitHubAccessTokenForm
 from home.views import list_classrooms
 import requests
 import json
+from members.models import UserProfile
 
 # funcs
 
@@ -28,7 +29,6 @@ def list_assignments(ghat, classroom_id):
 
 def login_user(request):
     if request.method == "POST":
-        first_name = request.POST['first_name']
         username = request.POST['username']
         github_access_token = request.POST['github_access_token']
         user = authenticate(username=username, password=github_access_token)
@@ -53,29 +53,28 @@ def logout_user(request):
     return render(request, 'home/templates/home.html', {})
 
 def register_user(request):
-    if request.POST == "POST":
+    if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
             form.save()
             username = form.cleaned_data['username']
-            github_access_token = form.cleaned_data['password1']
-        # add if validating ghat
-            user = authenticate(username=username, password=github_access_token)
+            password = form.cleaned_data['password1']
+            user = authenticate(username=username, password=password)
             login(request, user)
-            if 'name' in request.session:
-                del request.session['name']
-            if 'ghat' in request.session:
-                del request.session['github_access_token']
-            request.session['name'] = username
-            request.session['github_access_token'] = github_access_token
             messages.success(request, "Registration successful!")
             return redirect('home:home')
     else:
         form = RegisterForm()
-        messages.success(request, "Registration error. Please try again.")
     return render(request, 'authenticate/register_user.html', {'form': form})
 
 def show_class_options(request):
+    # if no changes had been made to user profile and user was directed right to class page, that means 
+    # request.session['class_list'] = list_classrooms() was not done, nor was setting
+    # request.session['github_access_token'] done
+    user = request.user
+    current_user = UserProfile.objects.get(user = user.id)
+    request.session['github_access_token'] = current_user.github_access_token
+    request.session['class_list'] = list_classrooms(request.session['github_access_token'])
     context = {'class_dict': request.session['class_list']}
     return render(request, 'members/templates/class.html', context = context)
 

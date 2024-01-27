@@ -34,14 +34,12 @@ class GitHubAccessTokenForm(forms.ModelForm):
          fields = '__all__'
 
 class RegisterForm(UserCreationForm):
-    first_name = forms.CharField(max_length=100)
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['first_name'].label = 'GitHub Access Token FR'
-        self.fields['password1'].label = 'GitHub Access Token'
-        self.fields['password2'].label = 'GitHub Access Token Confirmation'
+        self.fields['password1'].label = 'Password'
+        self.fields['password2'].label = 'Password Confirmation'
         self.fields['username'].label = 'Username'
-        self.fields['password2'].help_text = "Enter the same GitHub Access Token as before, for verification."
+        self.fields['password2'].help_text = "Enter the same Password as before, for verification."
 
      
 class AccAssignmentsForm(forms.Form):
@@ -53,4 +51,4 @@ class AccAssignmentsForm(forms.Form):
 class UserProfileForm(forms.ModelForm):
      class Meta:
           model=UserProfile
-          fields = ['json_file', 'github_access_token']
+          fields = ['json_file', 'github_access_token', 'google_sheet_name']

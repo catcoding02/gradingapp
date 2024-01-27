@@ -15,11 +15,13 @@ class Student(models.Model):
     student = models.BooleanField
 
 class GradingConfig(models.Model):
-    standard = models.CharField(max_length=200, default='Standard')
-    points = models.CharField(max_length=200, default='Points')
-    row = models.CharField(max_length=200, default='Row')
+    user= models.ForeignKey(User,on_delete=models.CASCADE,null=True,related_name="user_2")
+    standard = models.CharField(max_length=200, blank=True, null=True, default='Standard')
+    points = models.CharField(max_length=200, default='Points', blank=True, null=True)
+    row = models.CharField(max_length=200, default='Row', blank=True, null=True)
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
-    json_file = models.FileField(upload_to='documents/%Y/%m/%d')
+    json_file = models.FileField(upload_to='documents/%Y/%m/%d', blank=True, null=True)
     github_access_token = models.CharField(max_length=200)
+    google_sheet_name = models.CharField(max_length=200)

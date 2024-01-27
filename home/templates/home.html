@@ -8,11 +8,8 @@
         {% else %}
             <h1>Hello Visitor, welcome to GradingApp! </h1>
         {% endif %}
-        {% if request.session.grading_list %}
-            <h2>{{ request.session.grading_list }}</h2>
-            <h2>{{ request.session.grading_config_dict }}</h2>
-        {% endif %}
         {% if user.is_authenticated and user_profile_form %}
+        <h3> {{ no_profile_logged_in }} </h3>
             <div>
                 <a href={% url 'members:logout' %}>
                     <button>Log Out</button>
@@ -25,11 +22,34 @@
                     <input type="submit" value="Submit">
                 </form>
             </div>
-        {% elif okur and current_user_form %}
-        <h3> {{ okur }} </h3>
+        {% elif json_file and ghat and google_sheet_form %}
+        <p>
+            {{ json_file }}
+            {{ ghat }}
+            {{ google_sheet_form }}
+        </p>
+        {% elif with_profile_logged_in and current_user_form %}
+        <h3> {{ with_profile_logged_in }} </h3>
         <form action = "" method = "post" enctype="multipart/form-data">
             {% csrf_token %}
         {{ current_user_form }}
+        <input type="submit" value="Submit Changes and Proceed To Next Page">
+        </form>
+        <div>
+            <a href={% url 'members:class' %}>
+                <button>No Changes and Proceed to Next Page</button>
+            </a>
+        </div>
+        <div>
+            <a href={% url 'members:logout' %}>
+                <button>Log Out</button>
+            </a>
+        </div>
+        {% elif error %}
+        <h3> {{ error }} </h3>
+        <form action = "" method = "post" enctype="multipart/form-data">
+            {% csrf_token %}
+        {{ form }}
         <input type="submit" value="Submit">
         </form>
         <div>

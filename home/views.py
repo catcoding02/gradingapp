@@ -31,35 +31,53 @@ def welcome_home(request):
     # context which shouldn't be a problem since we aren't
     # asking to display any context in that case anyways
     # getting form
-    user = request.user
-    if not UserProfile.objects.get(user_id = user.id):
+    try:
+        user_profile_test = UserProfile.objects.get(user = request.user.id)
+    except UserProfile.DoesNotExist:
+        user_profile_test = None
+    # if no existing user profile info and request not post, which covers if it's a person's
+    # first time submitting the form and they have yet to save a profile
+    if not user_profile_test and not request.method == 'POST':
         form = UserProfileForm()
         context = {
-                'user_profile_form': form
+                'user_profile_form': form,
+                'no_profile_logged_in': 'You are currently logged in. You need to submit some user information before you proceed. Please provide information for ALL fields, and then press submit.'
             }
         return HttpResponse(template.render(context, request))
+    # if new changes have been posted. this applies to users with an existing profile
+    # or users who have just created their profile
     elif request.method == "POST":
         form = UserProfileForm(request.POST, request.FILES)
         if form.is_valid():
             user_profile = form.save(commit=False)
             user_profile.user = request.user
-            # deletes current instance and replaces with new one
             user = request.user
-            UserProfile.objects.get(user_id = user.id).delete()
+            # if user_profile_test is true, this handles case where there was an existing UserProfile
+            # for this user and it needs to be deleted and then updated w/ new info
+            # if this is user's first UserProfile, user_profile_test will return
+            # false and this code is skipped over since no records need to be 
+            # deleted before updating
+            if user_profile_test:
+                if not form.cleaned_data['json_file']:
+                    json_file = user_profile_test.json_file
+                    UserProfile.objects.get(user_id = user.id).delete()
+                    user_profile.json_file = json_file
+                    print("no json changes made it happen")
+                elif form.cleaned_data['json_file']:
+                    UserProfile.objects.get(user_id = user.id).delete()
             user_profile.save()
-            request.session['github_access_token'] = form.cleaned_data['github_access_token']
-            request.session['class_list'] = list_classrooms(request.session['github_access_token'])
             return redirect('members:class')
-        else:
-            # if form not valid despite there already being stuff posted to the form
-            # it must mean they are good with what they've got and it's time for them to move on
-            request.session['github_access_token'] = form.cleaned_data['github_access_token']
-            request.session['class_list'] = list_classrooms(request.session['github_access_token'])
-            return redirect('members:class')
+        # after user has pressed submit button, but did not change anything
+        else:       
+            form = UserProfileForm()
+            context = {'form': form, 'error': 'An error has occurred with the form submission. Make sure all fields have been filled in, or contact site admins for more help.'}
+            return HttpResponse(template.render(context, request))
     else:
+        # if user has profile and the info is there to post, no changes made yet
         user = request.user
         current_profile_obj = UserProfile.objects.get(user_id=user.id)
         form = UserProfileForm(instance = current_profile_obj)
-        context = {'current_user_form': form, 'okur': 'you are logged in but you have already filled out the user profile stuff! you can edit it tho if u want'}
+        current_profile_obj.save()
+        context = {'current_user_form': form, 'with_profile_logged_in': 'You are currently logged in. Your user profile information is displayed below. You can change it, or proceed to the next page.'}
         return HttpResponse(template.render(context, request))
 

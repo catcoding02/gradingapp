@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "sds-classroom-386803",
+  "private_key_id": "f439bfc983e96ca91b9f19df851e184c7380299e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDPmerWnySDGfaQ\nS5YRYuN7lV3WBmGWDw4yZyGRqwW/0HBMygaVADEUIEirdPJbb46siiXJ7NqE5CjP\n7pA45/y6Xd8JsefdOWjaEgqULK156yt0FhoEajmoTrxu5H8PkphjbgdBN8XM1jT0\n+cNRUSfFHs9dzxSTdTWBUomtLD8bwVFN9eegr68MjJUfFVryx+ee00DwlKyrNWrb\nc18W0sWJm3U32udlZ5YHr/nxQn+vwpYmL9cKFgc7mnJTR4BP/AAJTDY5c4ccjBND\n5OJpNsw6jknofDaDUNmig08PLv1m9dc6xK7zRg2/ZFM95/zG2qZUDjxHa8pKMURQ\nFNTDxZdvAgMBAAECggEAF1pyL3iG4UnvZvtfGKTuKtMk/imI8BomIly1oFmuc43I\nGZX0Yu3ll3pWPRYSbrTARlU4EQdYQZtvooxspD98j551s5/UEcUehWwtd85a1ByK\nA9dkpTB/PJlhhdFQdc5WNCvcHGW2Fj0r3I79fiKfUwO3Qg9Eeki0yc/LdbPvhCM+\n0aJMNxUBoawAyKgDfH03qEi+o73y+3h1znL2FB2iUaiKTGzkxDOUNm4bgxDJHGM5\nSHk8CugeYT7uzC9SBWqfJ/yKbvkInQckBB1YWjez4GegS6bFf8eHboNJu1z+pZ2Q\nHccvucRwesxEC7a/koA9dCTmNsHBVA+VCOtk4kJ6IQKBgQDveyFiLicnSDjUhNzV\niqHidDrnmKqE+8BHQ3EiJ5E+HUUOHPOAipNN2DZZ1tcNzlCYR3Q2pfeAOmYS4frJ\nf1J4G6YdAppn113ZXI6mGE4I70e+LdRSRmqdnjFp6pK/5SWU0U63ZLz7CmairWzp\n6IxYa1zwKVKOQDOtdu/864vH/wKBgQDd69baYbgRAky+zv9TNmv/Ent+4wMG+8ol\neNiJ8GlvdvrKJuOEfpzBPAXMXu6mlhfevoxuAET1FH0qT2SY7S7yCV6TIxLfJMeX\nQdbcnoE8CeghAudIExoMKkiOqwyzYwpW7BhbCzmgaLvA4rQpi91zmEIwnb8iHisn\n68aqb+awkQKBgBUGoIW4O6PNSYAPMjxlcZUqU0mmM8J9QAKBv1saUjw74aY9kHuG\nryw0gYEdxb/mj1jvXRq3M6XEetXJlXU/goQdGVaOtfPMCudcowGePKu4JnpiF7Qp\njo7MJtZ/y+ahPc11Gw4rABSicyRxSZC35CqXMo+7cQ4gQOlH+gYgwCMNAoGBAJcr\nhxD9zefwPB0iXnTttoVrrqpRs4c3T41VE5RrKzddwhqggQ2JPfi3jW+ZH1JlHd+C\nx6BLGK4mBdkjefBeaUNAtKbgFoPgxwE3PUjNxFUEnpaWJrxHHtA4oXJl/GHaTnnF\nnBWwwNGPZo5PH9DJUNHkXvpFCqUQDe/EwXDqhyexAoGBAI0723IowyNDlgoTsoKm\nF9dnyLG7EjVr9xyiKOydIYcirTfwsFk1ZX9+hHVM05U9C6nUXF6IMtyH90Ip0jM7\naZikIQ7fq86WfktnXdum0TUGmBstX9GUK4GAI9W7772hFCYygUjIEQBHhToPV/e/\nSQ9l0dNiTkfY8MpVkMYAADtr\n-----END PRIVATE KEY-----\n",
+  "client_email": "sdsgrader@sds-classroom-386803.iam.gserviceaccount.com",
+  "client_id": "108287200974275743209",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sdsgrader%40sds-classroom-386803.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
