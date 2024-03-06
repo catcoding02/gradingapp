@@ -1,4 +1,5 @@
 runtime: python310
+entrypoint: gunicorn -b :$PORT gradingapp.wsgi
 
 beta_settings:
     cloud_sql_instances: your_cloud_sql_instance
@@ -23,4 +24,3 @@ handlers:
     redirect_http_response_code: 301
     script: auto
 
-runtime: python39
