@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-khi*mv5i*xt85m2pz5ev0_cd%(+io35ye%f=++0q^oh2-h%_(&"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['gradingapp-411122.uk.r.appspot.com',]
 
 
 # Application definition
@@ -60,6 +60,8 @@ INTERNAL_IPS = [
     "127.0.0.1",
     # ...
 ]
+
+CSRF_COOKIE_SECURE = "True"
 
 ROOT_URLCONF = "gradingapp.urls"
 

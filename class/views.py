@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 import requests
 import json
 from django.views.generic.edit import FormView
-from gradingapp.forms import AccAssignmentsForm
+from gradingapp.forms import AccAssignmentsForm,ExtraCommentsForm
 from members.models import Student,GradingConfig,UserProfile
 from django.forms import modelformset_factory
 from django.http import HttpResponse, HttpResponseRedirect
@@ -11,6 +11,10 @@ import gspread
 from github import Github,Auth
 import github
 import re
+import time
+from django.contrib import messages
+from django_q.tasks import async_task, result
+
 
 # helper funcs
 
@@ -51,7 +55,7 @@ def get_grading_config_objects():
 
 def google_sheets_setup(request):
         """
-        Run Google Sheets set-up
+        Run Google Sheets set-up. See above. Tried and tested!
         """
         user = request.user
         current_user = UserProfile.objects.get(user = user.id)
@@ -71,7 +75,7 @@ def google_sheets_setup(request):
 
 def get_contributors(request):
     """
-    Gets contribitors to GitHub repository. Should return one student if lab, or all students 
+    Gets contribitors to GitHub repository. Should return one student if lab, or all students
     in a team if this is a mini-project
     :Returns: dict: key is repository name, values are student contributors
     """
@@ -85,6 +89,121 @@ def get_contributors(request):
         contrib_dict[repo] = contrib_list_all[index]
     print(contrib_dict)
     return contrib_dict
+
+def to_input(comments, worksheet, grading_config_dict, extra_comments_row):
+    """
+    Handles cases where student has a commit and has a comment. Handles comments that deduct
+    standard points as well as a comment that indicates 100% successful completion
+    :params:
+    comments: comment object from .get_pulls_comments()
+    worksheet: lab_sheet from above
+    """
+    for comment in comments:
+        if "Complete: " in comment.body:
+             for standard in list(grading_config_dict.keys()):
+                points = float(grading_config_dict[f'{standard}'][0])
+                row = float(grading_config_dict[f'{standard}'][1])
+                worksheet.update_acell(f'F{row}', f'{points}')
+                worksheet.update_acell(f'G{extra_comments_row}', f'{comment.body}')
+        if "Blank: " in comment.body:
+            for standard in list(grading_config_dict.keys()):
+                worksheet.update_acell(f'F{row}', '0.0')
+                worksheet.update_acell(f'G{extra_comments_row}', f'{comment.body}')
+        else:
+            standards_graded = list(grading_config_dict.keys())
+            for standard in standards_graded[:]:
+                if standard in comment.body:
+                    standards_graded.remove(standard)
+                    # handle points
+                    points = re.search(f"{standard}: \d+\.\d+", comment.body).group(0)
+                    points = re.search("\d+\.\d+", points).group(0)
+                    points = float(points)
+                    row = float(grading_config_dict[f'{standard}'][1])
+                    # handle comment
+                    standard_comment_start = comment.body.find(f'{standard}: ')
+                    standard_comment_end = comment.body.find("\n", standard_comment_start)
+                    standard_comment = comment.body[standard_comment_start:standard_comment_end]
+                    worksheet.update_acell(f'F{row}', f'{points}')
+                    worksheet.update_acell(f'G{row}', standard_comment)
+                    # once comment with standard has been found, final points have been deducted
+                    # and move to next standard
+                    time.sleep(2)
+                else:
+                    continue
+            for standard in standards_graded:
+                points = float(grading_config_dict[f'{standard}'][0])
+                row = float(grading_config_dict[f'{standard}'][1])
+                worksheet.update_acell(f'F{row}', f'{points}')
+                time.sleep(2)
+
+def transfer_comments(ghat, extra_comments_row, grading_config_dict, sheet, contrib_dict):
+    """
+    Transfers GitHub grades and comments to Google Sheets gradebook
+    :params:
+    sheet: return from google_sheets_setup()
+    contrib_dict: return from get_contributors()
+    """
+    contrib_dict_keys = list(contrib_dict.keys())
+    contrib_dict_values = list(contrib_dict.values())
+    for index,repo in enumerate(contrib_dict_keys):
+        # get repo
+        assignment_repo = Github(auth=github.Auth.Token(f'{ghat}')).get_repo(repo)
+        # get corresponding student list for repo
+        student_list = contrib_dict_values[index]
+        # get comments from repo
+        comments = assignment_repo.get_pulls_comments()
+        # publish grades
+        for student in student_list[:]:
+            time.sleep(10)
+            student_list.remove(student)
+            # find student worksheet in Google Sheets
+            worksheet = sheet.worksheet(student)
+            if comments.totalCount > 0:
+                for comment in comments:
+                    if "Complete: " in comment.body:
+                         for standard in list(grading_config_dict.keys()):
+                            points = float(grading_config_dict[f'{standard}'][0])
+                            row = float(grading_config_dict[f'{standard}'][1])
+                            worksheet.update_acell(f'F{row}', f'{points}')
+                            worksheet.update_acell(f'G{extra_comments_row}', f'{comment.body}')
+                    if "Blank: " in comment.body:
+                        for standard in list(grading_config_dict.keys()):
+                            worksheet.update_acell(f'F{row}', '0.0')
+                            worksheet.update_acell(f'G{extra_comments_row}', f'{comment.body}')
+                    else:
+                        standards_graded = list(grading_config_dict.keys())
+                        for standard in standards_graded[:]:
+                            if standard in comment.body:
+                                standards_graded.remove(standard)
+                                # handle points
+                                points = re.search(f"{standard}: \d+\.\d+", comment.body).group(0)
+                                points = re.search("\d+\.\d+", points).group(0)
+                                points = float(points)
+                                row = float(grading_config_dict[f'{standard}'][1])
+                                # handle comment
+                                standard_comment_start = comment.body.find(f'{standard}: ')
+                                standard_comment_end = comment.body.find("\n", standard_comment_start)
+                                standard_comment = comment.body[standard_comment_start:standard_comment_end]
+                                worksheet.update_acell(f'F{row}', f'{points}')
+                                worksheet.update_acell(f'G{row}', standard_comment)
+                                # once comment with standard has been found, final points have been deducted
+                                # and move to next standard
+                                time.sleep(2)
+                            else:
+                                continue
+                        for standard in standards_graded:
+                            points = float(grading_config_dict[f'{standard}'][0])
+                            row = float(grading_config_dict[f'{standard}'][1])
+                            worksheet.update_acell(f'F{row}', f'{points}')
+                            time.sleep(2)
+                        print("did it all inside!")
+            else:
+                # no commit, break and go to next student
+                print(f"No commit for {student}!")
+                worksheet.update_acell(f'G{extra_comments_row}', 'You did not commit a lab. Please do so as soon as possible.')
+                continue
+            print("did it all!")
+
 
 def run_the_grader(request):
 
@@ -109,7 +228,7 @@ def run_the_grader(request):
         return sheet
     def get_contributors(request):
         """
-        Gets contribitors to GitHub repository. Should return one student if lab, or all students 
+        Gets contribitors to GitHub repository. Should return one student if lab, or all students
         in a team if this is a mini-project
         :Returns: dict: key is repository name, values are student contributors
         """
@@ -130,8 +249,8 @@ def run_the_grader(request):
         sheet: return from google_sheets_setup()
         contrib_dict: return from get_contributors()
         """
-        
-        def to_input(comments, worksheet, grading_config_dict):
+
+        def to_input(comments, worksheet, grading_config_dict, extra_comments_row):
             """
             Handles cases where student has a commit and has a comment. Handles comments that deduct
             standard points as well as a comment that indicates 100% successful completion
@@ -139,15 +258,22 @@ def run_the_grader(request):
             comments: comment object from .get_pulls_comments()
             worksheet: lab_sheet from above
             """
-            for comment in comments: 
+            for comment in comments:
                 if "Complete: " in comment.body:
                      for standard in list(grading_config_dict.keys()):
                         points = float(grading_config_dict[f'{standard}'][0])
                         row = float(grading_config_dict[f'{standard}'][1])
                         worksheet.update_acell(f'F{row}', f'{points}')
-                else:
+                        worksheet.update_acell(f'G{extra_comments_row}', f'{comment.body}')
+                if "Blank: " in comment.body:
                     for standard in list(grading_config_dict.keys()):
+                        worksheet.update_acell(f'F{row}', '0.0')
+                        worksheet.update_acell(f'G{extra_comments_row}', f'{comment.body}')
+                else:
+                    standards_graded = list(grading_config_dict.keys())
+                    for standard in standards_graded[:]:
                         if standard in comment.body:
+                            standards_graded.remove(standard)
                             # handle points
                             points = re.search(f"{standard}: \d+\.\d+", comment.body).group(0)
                             points = re.search("\d+\.\d+", points).group(0)
@@ -157,18 +283,23 @@ def run_the_grader(request):
                             standard_comment_start = comment.body.find(f'{standard}: ')
                             standard_comment_end = comment.body.find("\n", standard_comment_start)
                             standard_comment = comment.body[standard_comment_start:standard_comment_end]
-                            print(standard_comment)
                             worksheet.update_acell(f'F{row}', f'{points}')
                             worksheet.update_acell(f'G{row}', standard_comment)
-                            # once comment with standard has been found, final points have been deduced
+                            # once comment with standard has been found, final points have been deducted
                             # and move to next standard
-                            break
+                            time.sleep(2)
                         else:
-                            print("continue")
                             continue
+                    for standard in standards_graded:
+                        points = float(grading_config_dict[f'{standard}'][0])
+                        row = float(grading_config_dict[f'{standard}'][1])
+                        worksheet.update_acell(f'F{row}', f'{points}')
+                        time.sleep(2)
 
         # run transfer_comments main stuff
         ghat = request.session['github_access_token']
+        extra_comments_row = request.session['extra_comments_dict']['row']
+        grading_config_dict = request.session['grading_config_dict']
         contrib_dict_keys = list(contrib_dict.keys())
         contrib_dict_values = list(contrib_dict.values())
         for index,repo in enumerate(contrib_dict_keys):
@@ -179,45 +310,49 @@ def run_the_grader(request):
             # get comments from repo
             comments = assignment_repo.get_pulls_comments()
             # publish grades
-            for student in student_list:
+            for student in student_list[:]:
+                time.sleep(10)
+                student_list.remove(student)
                 # find student worksheet in Google Sheets
                 lab_sheet = sheet.worksheet(student)
                 if comments.totalCount > 0:
-                    to_input(comments = comments, worksheet = lab_sheet, grading_config_dict = request.session['grading_config_dict'])
+                    to_input(comments, lab_sheet, grading_config_dict, extra_comments_row)
                 else:
                     # no commit, break and go to next student
                     print(f"No commit for {student}!")
+                    lab_sheet.update_acell(f'G{extra_comments_row}', 'You did not commit a lab. Please do so as soon as possible.')
                     continue
-
     # run run_the_grader main stuff
     sheet = google_sheets_setup(request = request)
     all_contrib = get_contributors(request = request)
     filtered_contrib = {select: all_contrib[select] for select in request.session['grading_list']}
     transfer_comments(request = request, sheet = sheet, contrib_dict = filtered_contrib)
-            
+    print("run the grader done!")
+
 # Create your views here.
 
 def show_acc_assignments(request, ASSIGNMENT_ID):
     if request.method == "POST":
+        print("post")
         form = AccAssignmentsForm(request.POST)
         if form.is_valid():
+            print("valid!")
             if request.POST.getlist('student'):
                 request.session['grading_list'] = request.POST.getlist('student')
+                print(request.POST.getlist('student'))
                 request.session['grading_config_dict'] = get_grading_config_objects()
-                # func testing
-                google_sheets_setup(request)
-                # gets dict for ALL assignments
-                all_contrib = get_contributors(request)
-                # filters for selected assignments
-                filtered_contrib = {select: all_contrib[select] for select in request.session['grading_list']}
                 # run run_the_grader() function here to do the grading stuff. Then redirect to some
                 # process successful or process failed page instead of accepted assignments html.
-                try:
-                    run_the_grader(request)
-                    context = {'process_done': 'Process Done!'}
-                except Exception as error:
-                    print(type(error).__name__)
-                    context = {'process_failed': 'Process Failed!'}
+                sheet = google_sheets_setup(request = request)
+                all_contrib = get_contributors(request = request)
+                filtered_contrib = {select: all_contrib[select] for select in request.session['grading_list']}
+                # set session variables for transfer comments
+                ghat = request.session['github_access_token']
+                extra_comments_row = request.session['extra_comments_dict']['row']
+                grading_config_dict = request.session['grading_config_dict']
+                # transfer comments run
+                transfer_comments(ghat, extra_comments_row, grading_config_dict, sheet, filtered_contrib)
+                context = {'process_done': 'Process is processing!'}
             return render(request, 'class/templates/process.html', context)
         else:
             form = AccAssignmentsForm()
@@ -239,18 +374,35 @@ def show_acc_assignments(request, ASSIGNMENT_ID):
         context = {'accepted_assignments': request.session['accepted_assignments_dict']}
         return render(request, 'class/templates/accepted_assignments.html', context = context)
 
-def grade_acc_assignments(request):
-    pass
+def batch(request, ASSIGNMENT_ID):
+    if request.method == "POST":
+        print("user requested to keep going")
+        try:
+            run_the_grader(request)
+            if len(request.session['grading_list']) > 1:
+                context = {'process_partial': 'Process Partially Complete. Press Continue to keep going'}
+            else:
+                context = {'process_done': 'Process Done!'}
+        except Exception as error:
+            print(type(error).__name__)
+            print(error)
+            context = {'process_failed': 'Process Failed for Batch 1!'}
+        return render(request, 'class/templates/process.html', context)
+    return render(request, 'class/templates/batch.html')
 
 
 def formset_view(request, ASSIGNMENT_ID):
     formset = modelformset_factory(GradingConfig, fields = ('standard', 'points', 'row'), extra = 10)
     if request.method == "POST":
-        form = formset(request.POST)
-        form.save()
-        next = request.POST.get('next')
-        return HttpResponseRedirect(next)
+        extra_form = ExtraCommentsForm(request.POST)
+        if extra_form.is_valid():
+            request.session['extra_comments_dict'] = extra_form.cleaned_data
+            form = formset(request.POST)
+            form.save()
+            next = request.POST.get('next')
+            return HttpResponseRedirect(next)
     else:
         redirect('https://weather.com')
     form = formset()
-    return render(request, 'class/templates/formset.html', {'formset':form, 'assignment_id': ASSIGNMENT_ID})
+    extra_form = ExtraCommentsForm()
+    return render(request, 'class/templates/formset.html', {'formset':form, 'extra_form': extra_form, 'assignment_id': ASSIGNMENT_ID})

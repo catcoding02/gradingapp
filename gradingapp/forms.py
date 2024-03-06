@@ -3,7 +3,7 @@ from django import forms
 from django.forms.utils import ErrorList
 from django.forms import formset_factory
 from django.contrib.auth.forms import UserCreationForm
-from members.models import Class,Student,UserProfile
+from members.models import Class,Student,UserProfile,ExtraComments
 import requests
 import json
  
@@ -46,6 +46,11 @@ class AccAssignmentsForm(forms.Form):
      student = forms.BooleanField()
      class Meta:
           model = Student
+          fields = '__all__'
+
+class ExtraCommentsForm(forms.ModelForm):
+     class Meta:
+          model=ExtraComments
           fields = '__all__'
 
 class UserProfileForm(forms.ModelForm):

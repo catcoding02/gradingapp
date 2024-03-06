@@ -9,6 +9,8 @@
     <form action="" method="post">
         {% csrf_token %}
         {{ formset.as_p }}
+        <p>Please specify which row to insert additional comments</p>
+        {{ extra_form.as_p }}
             <input type="hidden" name="next" value="{% url 'class:ASSIGNMENT_ID' ASSIGNMENT_ID=assignment_id %}">
             <input type="submit" value="Submit">
     </form>

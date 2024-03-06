@@ -25,3 +25,6 @@ class UserProfile(models.Model):
     json_file = models.FileField(upload_to='documents/%Y/%m/%d', blank=True, null=True)
     github_access_token = models.CharField(max_length=200)
     google_sheet_name = models.CharField(max_length=200)
+
+class ExtraComments(models.Model):
+    row = models.CharField(max_length=200)
