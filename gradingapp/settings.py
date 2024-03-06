@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-khi*mv5i*xt85m2pz5ev0_cd%(+io35ye%f=++0q^oh2-h%_(&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['gradingapp-411122.uk.r.appspot.com',]
+ALLOWED_HOSTS = ['gradingapp-411122.uk.r.appspot.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
